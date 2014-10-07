@@ -2,7 +2,6 @@ package guestbook
 
 import (
 	"appengine"
-	"appengine/datastore"
 	"html/template"
 	"net/http"
 
@@ -11,16 +10,12 @@ import (
 
 func HandleFunc(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	c.Infof("guestbook.HandleFunc")
-
-	q := datastore.NewQuery("Greeting").
-		Ancestor(models.GuestbookKey(c)).
-		Order("-Date").
-		Limit(10)
-	greetings := make([]models.Greeting, 0, 10)
-	if _, err := q.GetAll(c, &greetings); err != nil {
+	//c.Infof("guestbook.HandleFunc")
+	var g *models.Greeting
+	count := 10
+	greetings := make([]models.Greeting, 0, count)
+	if err := g.GetRecent(c, &greetings, count); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 	if err := guestbookTemplate.Execute(w, greetings); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

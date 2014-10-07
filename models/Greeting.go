@@ -15,3 +15,14 @@ type Greeting struct {
 	Content string
 	Date    time.Time
 }
+
+func (g *Greeting) GetRecent(c appengine.Context, greetings *[]Greeting, count int) error {
+	q := datastore.NewQuery("Greeting").
+		Ancestor(GuestbookKey(c)).
+		Order("-Date").
+		Limit(count)
+	if _, err := q.GetAll(c, greetings); err != nil {
+		return err
+	}
+	return nil
+}
